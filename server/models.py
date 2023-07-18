@@ -78,17 +78,27 @@ class House(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
-    scores = db.relationship('Score', backref='house')
+    overall_score = db.Column(db.Integer, default=0) # Add a column to store the overall score of each house
 
-class Score(db.Model, SerializerMixin):
-    __tablename__ = 'scores'
+    users = db.relationship('User', back_populates='house')
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', backref='scores')
-    house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
-    score = db.Column(db.Integer)
+    @property
+    
+    def calculate_overall_score(self):
+        # Calculate the overall score based on the individual scores of the users in the house
+        overall_score = sum(user.score for user in self.users)
+        self.overall_score = overall_score
+        return overall_score
 
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+# class Score(db.Model, SerializerMixin):
+#     __tablename__ = 'scores'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     user = db.relationship('User', backref='scores')
+#     house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
+#     score = db.Column(db.Integer)
+
+#     created_at = db.Column(db.DateTime, server_default=db.func.now())
+#     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
