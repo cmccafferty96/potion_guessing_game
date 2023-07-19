@@ -65,6 +65,7 @@ class Ingredient(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     description = db.Column(db.String(50))
+    thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
 
 class Potion(db.Model, SerializerMixin):
     __tablename__ = 'potions'
@@ -72,6 +73,7 @@ class Potion(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     correct_ingredients = db.Column(db.ARRAY(db.Integer))
+    thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
 
 class House(db.Model, SerializerMixin):
     __tablename__ = 'houses'
@@ -89,6 +91,7 @@ class House(db.Model, SerializerMixin):
         overall_score = sum(user.score for user in self.users)
         self.overall_score = overall_score
         return overall_score
+
 
 # class Score(db.Model, SerializerMixin):
 #     __tablename__ = 'scores'
