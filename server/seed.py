@@ -8,16 +8,10 @@ from faker import Faker
 
 # Local imports
 from app import app
-from models import db
+from models import Potion, Ingredient, db
+# from models import db
+# from config import db
 
-if __name__ == '__main__':
-    fake = Faker()
-    with app.app_context():
-        print("Starting seed...")
-        # Seed code goes here!
-
-from config import db
-from models import User, Potion, Ingredient
 
 def seed_data():
     # Create ingredients
@@ -172,7 +166,7 @@ def seed_data():
             'description': 'the tawny owl is associated with wisdom and honesty',
             'thumbnail': 'https://imgur.com/WVqFubV'
         }
-        
+                
     ]
 
     # Seed potions
@@ -282,3 +276,27 @@ def seed_data():
             'thumbnail': 'https://imgur.com/fnvjLj8'
         },
     ]
+
+    with app.app_context():
+        print('Starting seed...')
+        
+
+        # Add ingredients to the database
+        for ingredient_data in ingredients:
+            ingredient = Ingredient(**ingredient_data)
+            db.session.add(ingredient)
+
+        # Add potions to the database
+        for potion_data in potions:
+            potion = Potion(**potion_data)
+            db.session.add(potion)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        print('Seed complete!')
+
+if __name__ == '__main__':
+    fake = Faker()
+    seed_data()
+            

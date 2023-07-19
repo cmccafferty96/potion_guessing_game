@@ -8,8 +8,11 @@ from datetime import datetime
 
 from config import db, bcrypt
 
+# Add one more validation
+
 # Join table for many-to-many relationship between Potion and Ingredient
-PotionIngredient = db.Table('potion_ingredient',
+PotionIngredient = db.Table(
+    'potion_ingredient',
     db.Column('potion_id', db.Integer, db.ForeignKey('potions.id'), primary_key=True),
     db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
     )
@@ -21,7 +24,7 @@ class User(db.Model, SerializerMixin, UserMixin):
     username = db.Column(db.String(50), unique=True)
     score = db.Column(db.Integer)
     house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
-    house = db.relationship('House', backref='users')
+    house = db.relationship('House', back_populates='users', foreign_keys=[house_id])
     _password_hash = db.Column(db.String)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
@@ -72,7 +75,7 @@ class Ingredient(db.Model, SerializerMixin):
     name = db.Column(db.String(50))
     description = db.Column(db.String(50))
     thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
-    potions = db.relationship('Potion', secondary=PotionIngredient, back_populates='potions')
+    potions = db.relationship('Potion', secondary=PotionIngredient, back_populates='ingredients')
 
 class Potion(db.Model, SerializerMixin):
     __tablename__ = 'potions'
@@ -91,6 +94,7 @@ class House(db.Model, SerializerMixin):
     overall_score = db.Column(db.Integer, default=0) # Add a column to store the overall score of each house
 
     users = db.relationship('User', back_populates='house')
+    
 
     @property
     
@@ -99,17 +103,4 @@ class House(db.Model, SerializerMixin):
         overall_score = sum(user.score for user in self.users)
         self.overall_score = overall_score
         return overall_score
-
-
-# class Score(db.Model, SerializerMixin):
-#     __tablename__ = 'scores'
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     user = db.relationship('User', backref='scores')
-#     house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
-#     score = db.Column(db.Integer)
-
-#     created_at = db.Column(db.DateTime, server_default=db.func.now())
-#     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 

@@ -3,19 +3,24 @@
 # Standard library imports
 
 # Remote library imports
-from flask import Flask, request, jsonify
-from flask_restful import Resource
+from flask import Flask, request, jsonify, make_response
+from flask_sqlalchemy import SQLAlchemy
+from flask_restful import Resource, Api
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from flask_migrate import Migrate
 
 # Local imports
-from config import app, db, api
-from models import User 
+from config import app, db, api 
+from models import User, House, Potion, Ingredient, PotionIngredient
+
+# Initialize the API
+# api = Api(app)
 
 # Views go here!
-migrate = Migrate(app, db)
+# migrate = Migrate(app, db)
 
-app = Flask(__name__)
+# app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.secret_key = 'your_secret_key'
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -55,6 +60,40 @@ def login():
         return jsonify(message='Login successful')
     
     return jsonify(message='Invalid username or password'), 401
+
+class UserByUsername(Resource):
+    def get(self, username):
+        user = User.query.filter_by(username=username).first()
+
+        if user:
+            return user.serialize(), 200
+        else:
+            return {'error': '404: User not found'}, 404
+        
+    def patch(self, username):
+        user = User.query.filter_by(username=username).first()
+        if user:
+            for attr in request.json:
+                setattr(user, attr, request.json[attr])
+            
+            db.session.commit()
+            return user.serialize(), 202
+        
+        return {'error': 'User not found'}, 404
+    
+    def delete(self, username):
+        user = User.query.filter_by(username=username).first()
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+
+            response = make_response("", 204)
+
+            return response
+        
+        return {'error': 'User not found'}, 404
+    
+api.add_resource(UserByUsername, '/users/<string:username>')
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
