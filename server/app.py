@@ -6,12 +6,14 @@
 from flask import Flask, request, jsonify
 from flask_restful import Resource
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from flask_migrate import Migrate
 
 # Local imports
 from config import app, db, api
 from models import User 
 
 # Views go here!
+migrate = Migrate(app, db)
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'

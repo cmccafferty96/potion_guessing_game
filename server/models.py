@@ -8,6 +8,12 @@ from datetime import datetime
 
 from config import db, bcrypt
 
+# Join table for many-to-many relationship between Potion and Ingredient
+PotionIngredient = db.Table('potion_ingredient',
+    db.Column('potion_id', db.Integer, db.ForeignKey('potions.id'), primary_key=True),
+    db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
+    )
+
 class User(db.Model, SerializerMixin, UserMixin):
     __tablename__ = 'users'
 
@@ -66,6 +72,7 @@ class Ingredient(db.Model, SerializerMixin):
     name = db.Column(db.String(50))
     description = db.Column(db.String(50))
     thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
+    potions = db.relationship('Potion', secondary=PotionIngredient, back_populates='potions')
 
 class Potion(db.Model, SerializerMixin):
     __tablename__ = 'potions'
@@ -74,6 +81,7 @@ class Potion(db.Model, SerializerMixin):
     name = db.Column(db.String(50))
     correct_ingredients = db.Column(db.ARRAY(db.Integer))
     thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
+    ingredients = db.relationship('Ingredient', secondary=PotionIngredient, back_populates='potions')
 
 class House(db.Model, SerializerMixin):
     __tablename__ = 'houses'
