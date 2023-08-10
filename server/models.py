@@ -25,10 +25,26 @@ class User(db.Model, SerializerMixin, UserMixin):
     score = db.Column(db.Integer)
     house_id = db.Column(db.Integer, db.ForeignKey('houses.id'))
     house = db.relationship('House', back_populates='users', foreign_keys=[house_id])
-    _password_hash = db.Column(db.String)
+    password = db.Column(db.String)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+
+    @classmethod
+    def create_user(cls, username, password):
+        hashed_password = bcrypt.generate_password_hash(password.encode('utf-8')).decode('utf-8')
+        new_user = cls(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return new_user
+    
+    def change_username(self, new_username):
+        self.username = new_username
+        db.session.commit()
+
+    def delete_account(self):
+        db.session.delete(self)
+        db.session.commit()
 
     @validates('username')
     def validate_username(self, key, username):
@@ -36,17 +52,23 @@ class User(db.Model, SerializerMixin, UserMixin):
             raise ValueError("Username must be between 1 and 25 characters")
         return username
     
-    @hybrid_property
-    def password_hash(self):
-        raise AttributeError('Password hashes may not be viewed.')
+    @validates('password')
+    def validate_password(self, password):
+        if len(password) > 25 or len(password) < 1:
+            raise ValueError("Password must be between 1 and 25 characters")
+        return password
+    
+    # @hybrid_property
+    # def password_hash(self):
+    #     raise AttributeError('Password hashes may not be viewed.')
 
-    @password_hash.setter
-    def password_hash(self, password):
-        password_hash = bcrypt.generate_password_hash(password.encode('utf-8'))
-        self._password_hash = password_hash.decode('utf-8')
+    # @password_hash.setter
+    # def password_hash(self, password):
+    #     password_hash = bcrypt.generate_password_hash(password.encode('utf-8'))
+    #     self._password_hash = password_hash.decode('utf-8')
 
-    def authenticate(self, password):
-        return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
+    # def authenticate(self, password):
+    #     return bcrypt.check_password_hash(self._password_hash, password.encode('utf-8'))
     
     @property
     def is_active(self):

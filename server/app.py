@@ -36,8 +36,7 @@ def register():
         return jsonify(message='Username already exists'), 409
     
     # Create a new user object and hash the password
-    user = User(username=username)
-    user.password_hash = password
+    user = User(username=username, password=password)
 
     # Save the user to the database
     db.session.add(user)
