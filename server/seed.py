@@ -4,7 +4,7 @@
 from random import randint, choice as rc
 
 # Remote library imports
-from faker import Faker
+# from faker import Faker
 
 # Local imports
 from app import app
@@ -13,8 +13,9 @@ from models import Potion, Ingredient, db
 # from config import db
 
 
-def seed_data():
-    # Create ingredients
+if __name__ == '__main__':
+    # fake = Faker()
+    
     ingredients = [
         {
             'id': 1,
@@ -174,104 +175,104 @@ def seed_data():
     potions = [
         {   'id': 1, 
             'name': 'Amortentia', 
-            'correct_ingredients': [1, 6, 16], 
+            'correct_ingredients': "1, 6, 16", 
             'description': 'A very potent love potion; can be toxic in high doses',
             'thumbnail': 'https://imgur.com/69a5oJf'
         },
         {   'id': 2, 
             'name': 'Potent Furor Poison',
-            'correct_ingredients': [1, 7, 17],
+            'correct_ingredients': "1, 7, 17",
             'description': 'A potent poison that induces powerful and potentially dangerous feelings of anger and rage when ingested',
             'thumbnail': 'https://imgur.com/jjoUA4E'
         },
         {
             'id': 3, 
             'name': 'Antidote to Common Poisons',
-            'correct_ingredients': [3, 7, 23],
+            'correct_ingredients': "3, 7, 23",
             'description': 'Antitode to most common poisons',
             'thumbnail': 'https://imgur.com/GDbe6Kt'
         },
         {
             'id': 4,
             'name': 'Elixir of Beauty',
-            'correct_ingredients': [4, 15, 23],
+            'correct_ingredients': "4, 15, 23",
             'description': 'Enhances the attractiveness of the drinkers physical appearance',
             'thumbnail': 'https://imgur.com/fnvjLj8'
         },
         {
             'id': 5,
             'name': 'Calming Draught',
-            'correct_ingredients': [5, 6, 16],
+            'correct_ingredients': "5, 6, 16",
             'description': 'Calms the drinker',
             'thumbnail': 'https://imgur.com/YtWK42H'
         },
         {
             'id': 6,
             'name': 'Draught of the Living Dead',
-            'correct_ingredients': [3, 10, 24],
+            'correct_ingredients': "3, 10, 24",
             'description': 'Induces a deep, restful sleep',
             'thumbnail': 'https://imgur.com/GDbe6Kt'
         },
         {
             'id': 7,
             'name': 'Soliservo Elixer',
-            'correct_ingredients': [2, 8, 19],
+            'correct_ingredients': "2, 8, 19",
             'description': 'When ingested, allows the user to withstand direct sunlight(intended for Vampire use only)',
             'thumbnail': 'https://imgur.com/d6rnFwr'
         },
         {
             'id': 8,
             'name': 'Ignus Noxa',
-            'correct_ingredients': [1, 10, 24],
+            'correct_ingredients': "1, 10, 24",
             'description': 'A simple, yet highly effective damage potion. Inflicts a singing effect on the intended target, causing extreme discomfort',
             'thumbnail': 'https://imgur.com/4yGeRfi'
         },
         {
             'id': 9,
             'name': 'Felix Felicis',
-            'correct_ingredients': [2, 9, 20],
+            'correct_ingredients': "2, 9, 20",
             'description': 'More commonly known as "Liquid Luck"; makes the drinker lucky for a limited period of time, during which everything they attempt will be successful',
             'thumbnail': 'https://imgur.com/ha4BJzk'
         },
         {
             'id': 10,
             'name': 'Dissolution Drought',
-            'correct_ingredients': [2, 7, 24],
+            'correct_ingredients': "2, 7, 24",
             'description': 'A malicious drought intended for use on a pair; induces strong feelings of disdain between the two targets',
             'thumbnail': 'https://imgur.com/jjoUA4E'
         },
         {
             'id': 11,
             'name': 'Wiggenweld Potion',
-            'correct_ingredients': [5, 10, 18],
+            'correct_ingredients': "5, 10, 18",
             'description': 'A very simple, yet potent healing potion that cures a wide variety of ailments and afflictions',
             'thumbnail': 'https://imgur.com/LUUmlOb'
         },
         {
             'id': 12,
             'name': 'Invisibility Potion',
-            'correct_ingredients': [5, 11, 21],
+            'correct_ingredients': "5, 11, 21",
             'description': 'A potion that makes the drinker invisible for a brief amount of time',
             'thumbnail': 'https://imgur.com/R4mqM7f'
         },
         {
             'id': 13,
             'name': 'Polyjuice Potion',
-            'correct_ingredients': [4, 12, 22],
+            'correct_ingredients': "4, 12, 22",
             'description': 'A complex and time-consuming concotion, which is best left to highly skilled witches and wizards. Allows the user to assume the physical appearance of another person',
             'thumbnail': 'https://imgur.com/CPo71n0'
         },
         {
             'id': 14,
             'name': 'Veritaserum',
-            'correct_ingredients': [2, 14, 25],
+            'correct_ingredients': "2, 14, 25",
             'description': 'A very powerful truth serum that forces the drinker to speak the truth',
             'thumbnail': 'https://imgur.com/stFTIGN'
         },
         {
             'id': 15,
             'name': 'Wolfsbane Potion',
-            'correct_ingredients': [4, 13, 24],
+            'correct_ingredients': "4, 13, 2",
             'description': 'A remedy for the most debilitating symptoms of lycanthropy; allows the drinker to keep their minds during the full moon',
             'thumbnail': 'https://imgur.com/fnvjLj8'
         },
@@ -279,24 +280,22 @@ def seed_data():
 
     with app.app_context():
         print('Starting seed...')
+        Ingredient.query.delete()
+        Potion.query.delete()
         
 
         # Add ingredients to the database
         for ingredient_data in ingredients:
-            ingredient = Ingredient(**ingredient_data)
+            ingredient = Ingredient(name=ingredient_data['name'], description=ingredient_data['description'], thumbnail=ingredient_data['thumbnail'])
             db.session.add(ingredient)
 
         # Add potions to the database
         for potion_data in potions:
-            potion = Potion(**potion_data)
+            potion = Potion(name=potion_data['name'], correct_ingredients=potion_data['correct_ingredients'], thumbnail=potion_data['thumbnail'] )
             db.session.add(potion)
 
         # Commit the changes to the database
         db.session.commit()
 
         print('Seed complete!')
-
-if __name__ == '__main__':
-    fake = Faker()
-    seed_data()
             

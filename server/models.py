@@ -12,7 +12,7 @@ from config import db, bcrypt
 
 # Join table for many-to-many relationship between Potion and Ingredient
 PotionIngredient = db.Table(
-    'potion_ingredient',
+    'potion_ingredients',
     db.Column('potion_id', db.Integer, db.ForeignKey('potions.id'), primary_key=True),
     db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
     )
@@ -30,21 +30,21 @@ class User(db.Model, SerializerMixin, UserMixin):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    @classmethod
-    def create_user(cls, username, password):
-        hashed_password = bcrypt.generate_password_hash(password.encode('utf-8')).decode('utf-8')
-        new_user = cls(username=username, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        return new_user
+    # @classmethod
+    # def create_user(cls, username, password):
+    #     hashed_password = bcrypt.generate_password_hash(password.encode('utf-8')).decode('utf-8')
+    #     new_user = cls(username=username, password=hashed_password)
+    #     db.session.add(new_user)
+    #     db.session.commit()
+    #     return new_user
     
-    def change_username(self, new_username):
-        self.username = new_username
-        db.session.commit()
+    # def change_username(self, new_username):
+    #     self.username = new_username
+    #     db.session.commit()
 
-    def delete_account(self):
-        db.session.delete(self)
-        db.session.commit()
+    # def delete_account(self):
+    #     db.session.delete(self)
+    #     db.session.commit()
 
     @validates('username')
     def validate_username(self, key, username):
@@ -104,7 +104,7 @@ class Potion(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
-    correct_ingredients = db.Column(db.ARRAY(db.Integer))
+    correct_ingredients = db.Column(db.String)
     thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
     ingredients = db.relationship('Ingredient', secondary=PotionIngredient, back_populates='potions')
 

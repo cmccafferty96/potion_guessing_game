@@ -26,6 +26,22 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 @app.route('/register', methods=['POST'])
+
+def update_user(username):
+    user = User.query.filter_by(username=username).first()
+
+    if user:
+        new_username = request.json.get('new_username')
+        if new_username:
+            user.username = new_username
+            db.session.commit()
+            return jsonify(message='Username updated successfully'), 200
+        else:
+            return jsonify(error='New username not provided'), 400
+    else:
+        return jsonify(error='User not found'), 404
+
+
 def register():
     # Extract user registration data from request
     username = request.json['username']
