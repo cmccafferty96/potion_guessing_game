@@ -97,31 +97,31 @@ class UserByUsername(Resource):
         else:
             return {'error': '404: User not found'}, 404
         
-    def patch(self, username):
-        user = User.query.filter_by(username=username).first()
+    def patch(self, id):
+        user = User.query.filter_by(id=id).first()
         if user:
             for attr in request.json:
                 setattr(user, attr, request.json[attr])
             
             db.session.commit()
-            return user.serialize(), 202
+            return user.to_dict(), 202
         
         return {'error': 'User not found'}, 404
     
     
-    def delete(self, username):
-        user = User.query.filter_by(username=username).first()
+    def delete(self, id):
+        user = User.query.filter_by(id=id).first()
         if user:
             db.session.delete(user)
             db.session.commit()
 
-            response = make_response("", 204)
+            response = make_response({}, 204)
 
             return response
         
         return {'error': 'User not found'}, 404
     
-api.add_resource(UserByUsername, '/users/<string:username>')
+api.add_resource(UserByUsername, '/users/<int:id>')
 
 class Potions(Resource):
     def get(self):
