@@ -6,12 +6,12 @@
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api
-from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+# from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from flask_migrate import Migrate
 
 # Local imports
 from config import app, db, api 
-from models import User, House, Potion, Ingredient, PotionIngredient
+from models import User, House, Potion, Ingredient, PotionIngredients
 
 # Initialize the API
 # api = Api(app)
@@ -22,25 +22,10 @@ from models import User, House, Potion, Ingredient, PotionIngredient
 # app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.secret_key = 'your_secret_key'
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+# login_manager = LoginManager(app)
+# login_manager.login_view = 'login'
 
 @app.route('/register', methods=['POST'])
-
-def update_user(username):
-    user = User.query.filter_by(username=username).first()
-
-    if user:
-        new_username = request.json.get('new_username')
-        if new_username:
-            user.username = new_username
-            db.session.commit()
-            return jsonify(message='Username updated successfully'), 200
-        else:
-            return jsonify(error='New username not provided'), 400
-    else:
-        return jsonify(error='User not found'), 404
-
 
 def register():
     # Extract user registration data from request
@@ -76,6 +61,33 @@ def login():
     
     return jsonify(message='Invalid username or password'), 401
 
+
+class Users(Resource):
+    def get(self):
+        users = User.query.all()
+        user_list = [user.to_dict() for user in users]
+        return user_list, 200
+    
+    def post(self):
+        # try:
+        new_user = User(
+            username=request.json['username'],
+            password=request.json['password']
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        new_user_dict = new_user.to_dict()
+
+        # print(new_user_dict)
+
+        return new_user_dict, 201
+        # except:
+        #     return jsonify({'error': '400: Validation error'}), 400
+        
+api.add_resource(Users, '/users')
+
 class UserByUsername(Resource):
     def get(self, username):
         user = User.query.filter_by(username=username).first()
@@ -96,6 +108,7 @@ class UserByUsername(Resource):
         
         return {'error': 'User not found'}, 404
     
+    
     def delete(self, username):
         user = User.query.filter_by(username=username).first()
         if user:
@@ -109,6 +122,35 @@ class UserByUsername(Resource):
         return {'error': 'User not found'}, 404
     
 api.add_resource(UserByUsername, '/users/<string:username>')
+
+class Potions(Resource):
+    def get(self):
+        potions = Potion.query.all()
+        potion_list = [potion.to_dict() for potion in potions]
+        return potion_list, 200
+    
+api.add_resource(Potions, '/potions')
+
+class Ingredients(Resource):
+    def get(self):
+        ingredients = Ingredient.query.all()
+        ingredient_list = [ingredient.to_dict() for ingredient in ingredients]
+        return ingredient_list, 200
+    
+api.add_resource(Ingredients, '/ingredients')
+    
+class Houses(Resource):
+    def get(self):
+        houses = House.query.all()
+        house_list = [house.to_dict() for house in houses]
+        return house_list, 200
+    
+api.add_resource(Houses, '/houses')
+    
+# class PotionIngredientsList(Resource):
+#     def get(self):
+#         potion_ingredients = PotionIngredients.query.all()
+#         potion_ingredient_list = [pi.serialize]
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

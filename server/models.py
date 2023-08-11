@@ -11,11 +11,11 @@ from config import db, bcrypt
 # Add one more validation
 
 # Join table for many-to-many relationship between Potion and Ingredient
-PotionIngredient = db.Table(
-    'potion_ingredients',
-    db.Column('potion_id', db.Integer, db.ForeignKey('potions.id'), primary_key=True),
-    db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
-    )
+# PotionIngredient = db.Table(
+#     'potion_ingredients',
+#     db.Column('potion_id', db.Integer, db.ForeignKey('potions.id'), primary_key=True),
+#     db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'), primary_key=True)
+#     )
 
 class User(db.Model, SerializerMixin, UserMixin):
     __tablename__ = 'users'
@@ -29,6 +29,12 @@ class User(db.Model, SerializerMixin, UserMixin):
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username
+        }
 
     # @classmethod
     # def create_user(cls, username, password):
@@ -52,11 +58,11 @@ class User(db.Model, SerializerMixin, UserMixin):
             raise ValueError("Username must be between 1 and 25 characters")
         return username
     
-    @validates('password')
-    def validate_password(self, password):
-        if len(password) > 25 or len(password) < 1:
-            raise ValueError("Password must be between 1 and 25 characters")
-        return password
+    # @validates('password')
+    # def validate_password(self, password):
+    #     if len(password) > 25 or len(password) < 1:
+    #         raise ValueError("Password must be between 1 and 25 characters")
+    #     return password
     
     # @hybrid_property
     # def password_hash(self):
@@ -97,7 +103,15 @@ class Ingredient(db.Model, SerializerMixin):
     name = db.Column(db.String(50))
     description = db.Column(db.String(50))
     thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
-    potions = db.relationship('Potion', secondary=PotionIngredient, back_populates='ingredients')
+    potions = db.relationship('PotionIngredients', backref = "ingredient")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "thumbnail": self.thumbnail
+        }
 
 class Potion(db.Model, SerializerMixin):
     __tablename__ = 'potions'
@@ -106,7 +120,21 @@ class Potion(db.Model, SerializerMixin):
     name = db.Column(db.String(50))
     correct_ingredients = db.Column(db.String)
     thumbnail = db.Column(db.String) # Add a column to store the thumbnail image URL
-    ingredients = db.relationship('Ingredient', secondary=PotionIngredient, back_populates='potions')
+    ingredients = db.relationship('PotionIngredients', backref = "potion")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "correct_ingredients": self.correct_ingredients,
+            "thumbnail": self.thumbnail
+        }
+
+class PotionIngredients(db.Model, SerializerMixin):
+    __tablename__= 'potion_ingredients'
+    id = db.Column(db.Integer, primary_key = True)
+    potion_id = db.Column('potion_id', db.Integer, db.ForeignKey('potions.id'))
+    ingredient_id = db.Column('ingredient_id', db.Integer, db.ForeignKey('ingredients.id'))
 
 class House(db.Model, SerializerMixin):
     __tablename__ = 'houses'
@@ -116,7 +144,13 @@ class House(db.Model, SerializerMixin):
     overall_score = db.Column(db.Integer, default=0) # Add a column to store the overall score of each house
 
     users = db.relationship('User', back_populates='house')
-    
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "overall_score": self.overall_score
+        }    
 
     @property
     
@@ -124,5 +158,5 @@ class House(db.Model, SerializerMixin):
         # Calculate the overall score based on the individual scores of the users in the house
         overall_score = sum(user.score for user in self.users)
         self.overall_score = overall_score
-        return overall_score
+        
 
